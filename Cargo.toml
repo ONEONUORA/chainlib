@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 axum = "0.7"
+
+[dev-dependencies]
+clippy = "*"
+rustfmt = "*"
