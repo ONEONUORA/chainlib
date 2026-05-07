@@ -1,27 +1,289 @@
-
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
 
 jobs:
-  build:
+  # Frontend CI/CD
+  frontend:
+    name: Frontend CI
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Build
-        run: cargo build --verbose
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
 
-      - name: Run tests
-        run: cargo test --verbose
+    - name: Install dependencies
+      run: npm ci
 
-      - name: Check formatting
-        run: cargo fmt -- --check
+    - name: Run ESLint
+      run: npm run lint
 
-      - name: Run clippy
-        run: cargo clippy -- -D warnings
+    - name: Run type check
+      run: npx tsc --noEmit
+
+    - name: Run tests
+      run: npm test -- --passWithNoTests
+
+    - name: Build application
+      run: npm run build
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-build
+        path: ./frontend/.next/
+        retention-days: 7
+
+  # Backend CI/CD
+  backend:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: chainlib_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: "./backend -> target"
+
+    - name: Check formatting
+      run: cargo fmt -- --check
+
+    - name: Run Clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Run tests
+      run: cargo test --verbose
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chainlib_test
+
+    - name: Build release
+      run: cargo build --release --verbose
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-binary
+        path: ./backend/target/release/chainlib-backend
+        retention-days: 7
+
+  # Smart Contracts CI/CD
+  contracts:
+    name: Smart Contracts CI
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./contracts/chainlib-contracts
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+        targets: wasm32-unknown-unknown
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: "./contracts/chainlib-contracts -> target"
+
+    - name: Install Soroban CLI
+      run: |
+        cargo install --locked soroban-cli --features opt
+
+    - name: Check formatting
+      run: cargo fmt -- --check
+
+    - name: Run Clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Build contracts
+      run: soroban contract build
+
+    - name: Verify WASM output
+      run: |
+        ls -la target/wasm32-unknown-unknown/release/
+        file target/wasm32-unknown-unknown/release/*.wasm
+
+    - name: Upload contract artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: contract-wasm
+        path: ./contracts/chainlib-contracts/target/wasm32-unknown-unknown/release/*.wasm
+        retention-days: 30
+
+  # Security and Quality Checks
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    needs: [backend, contracts]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Run cargo audit (Backend)
+      run: |
+        cargo install cargo-audit
+        cd backend && cargo audit
+
+    - name: Run cargo audit (Contracts)
+      run: |
+        cd contracts/chainlib-contracts && cargo audit
+
+    - name: Frontend security audit
+      run: |
+        cd frontend && npm audit --audit-level moderate
+
+  # Integration Tests
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [frontend, backend, contracts]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: chainlib_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: wasm32-unknown-unknown
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Install Soroban CLI
+      run: cargo install --locked soroban-cli --features opt
+
+    - name: Install dependencies
+      run: |
+        cd frontend && npm ci
+        cd ../backend && cargo build --release
+
+    - name: Build contracts
+      run: |
+        cd contracts/chainlib-contracts
+        soroban contract build
+
+    - name: Run integration tests
+      run: |
+        # Start backend server in background
+        cd backend
+        DATABASE_URL=postgresql://postgres:postgres@localhost:5432/chainlib_test \
+        cargo run --release &
+        BACKEND_PID=$!
+        
+        # Wait for server to start
+        sleep 10
+        
+        # Run frontend build (which includes API calls)
+        cd ../frontend
+        NEXT_PUBLIC_API_URL=http://localhost:3001 npm run build
+        
+        # Cleanup
+        kill $BACKEND_PID || true
+
+  # Deployment (only on main branch)
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [integration]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
+
+    - name: List artifacts
+      run: ls -la ./artifacts/
+
+    # Add your deployment steps here
+    # For example, deploy to cloud providers, update containers, etc.
+    - name: Deploy notification
+      run: |
+        echo "🚀 Deployment would happen here"
+        echo "Frontend build: ./artifacts/frontend-build"
+        echo "Backend binary: ./artifacts/backend-binary"
+        echo "Contract WASM: ./artifacts/contract-wasm"

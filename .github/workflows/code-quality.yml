@@ -1,0 +1,231 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Rust code quality checks
+  rust-quality:
+    name: Rust Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+
+    # Backend checks
+    - name: Check backend formatting
+      run: |
+        cd backend
+        cargo fmt -- --check
+
+    - name: Backend clippy
+      run: |
+        cd backend
+        cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Backend unused dependencies
+      run: |
+        cargo install cargo-machete
+        cd backend
+        cargo machete
+
+    # Contracts checks
+    - name: Install Soroban CLI
+      run: cargo install --locked soroban-cli --features opt
+
+    - name: Check contracts formatting
+      run: |
+        cd contracts/chainlib-contracts
+        cargo fmt -- --check
+
+    - name: Contracts clippy
+      run: |
+        cd contracts/chainlib-contracts
+        cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Contracts unused dependencies
+      run: |
+        cd contracts/chainlib-contracts
+        cargo machete
+
+  # Frontend code quality checks
+  frontend-quality:
+    name: Frontend Code Quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: ESLint check
+      run: npm run lint
+
+    - name: TypeScript check
+      run: npx tsc --noEmit
+
+    - name: Prettier check
+      run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css,md}"
+
+    - name: Check for unused dependencies
+      run: |
+        npx depcheck --ignores="@types/*,eslint-*,prettier,typescript"
+
+  # Security checks
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+
+    # Rust security audit
+    - name: Install cargo-audit
+      run: cargo install cargo-audit
+
+    - name: Backend security audit
+      run: |
+        cd backend
+        cargo audit
+
+    - name: Contracts security audit
+      run: |
+        cd contracts/chainlib-contracts
+        cargo audit
+
+    # Frontend security audit
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+
+    - name: Frontend security audit
+      run: |
+        cd frontend
+        npm audit --audit-level moderate
+
+  # License and documentation checks
+  documentation:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check for README files
+      run: |
+        echo "Checking for README files..."
+        find . -name "README.md" -type f | head -10
+
+    - name: Check for license
+      run: |
+        if [ ! -f LICENSE ] && [ ! -f LICENSE.md ] && [ ! -f LICENSE.txt ]; then
+          echo "❌ No LICENSE file found"
+          exit 1
+        else
+          echo "✅ LICENSE file found"
+        fi
+
+    - name: Check Rust documentation
+      run: |
+        cd backend
+        cargo doc --no-deps --document-private-items
+
+    - name: Check contracts documentation
+      run: |
+        cd contracts/chainlib-contracts
+        cargo doc --no-deps --document-private-items
+
+  # Performance and size checks
+  performance:
+    name: Performance Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: wasm32-unknown-unknown
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Install Soroban CLI
+      run: cargo install --locked soroban-cli --features opt
+
+    # Check binary sizes
+    - name: Build backend (release)
+      run: |
+        cd backend
+        cargo build --release
+        ls -lh target/release/chainlib-backend
+
+    - name: Build contracts
+      run: |
+        cd contracts/chainlib-contracts
+        soroban contract build
+        ls -lh target/wasm32-unknown-unknown/release/*.wasm
+
+    # Frontend bundle analysis
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Build frontend and analyze
+      run: |
+        cd frontend
+        npm run build
+        
+        # Check build size
+        echo "Frontend build size:"
+        du -sh .next/
+
+    - name: Bundle analyzer
+      run: |
+        cd frontend
+        npx @next/bundle-analyzer --help || echo "Bundle analyzer not configured"

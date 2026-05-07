@@ -1,0 +1,71 @@
+{
+  "name": "chainlib",
+  "version": "1.0.0",
+  "description": "Decentralized e-library platform on Stellar blockchain",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && cargo run",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:docker": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
+    "build": "npm run build:backend && npm run build:frontend && npm run build:contracts",
+    "build:backend": "cd backend && cargo build --release",
+    "build:frontend": "cd frontend && npm run build",
+    "build:contracts": "cd contracts/chainlib-contracts && soroban contract build",
+    "test": "npm run test:backend && npm run test:frontend && npm run test:contracts",
+    "test:backend": "cd backend && cargo test",
+    "test:frontend": "cd frontend && npm test -- --passWithNoTests",
+    "test:contracts": "cd contracts/chainlib-contracts && cargo test",
+    "lint": "npm run lint:backend && npm run lint:frontend && npm run lint:contracts",
+    "lint:backend": "cd backend && cargo clippy --all-targets --all-features -- -D warnings",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:contracts": "cd contracts/chainlib-contracts && cargo clippy --all-targets --all-features -- -D warnings",
+    "format": "npm run format:backend && npm run format:frontend && npm run format:contracts",
+    "format:backend": "cd backend && cargo fmt",
+    "format:frontend": "cd frontend && npx prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:contracts": "cd contracts/chainlib-contracts && cargo fmt",
+    "setup": "npm run setup:frontend && npm run setup:backend && npm run setup:contracts",
+    "setup:frontend": "cd frontend && npm install",
+    "setup:backend": "cd backend && cargo build",
+    "setup:contracts": "cargo install --locked soroban-cli --features opt",
+    "deploy:contracts:testnet": "cd contracts/chainlib-contracts && soroban contract deploy --wasm target/wasm32-unknown-unknown/release/chainlib.wasm --source alice --network testnet",
+    "deploy:contracts:mainnet": "cd contracts/chainlib-contracts && soroban contract deploy --wasm target/wasm32-unknown-unknown/release/chainlib.wasm --source alice --network mainnet",
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down",
+    "docker:clean": "docker-compose down -v --remove-orphans && docker system prune -f",
+    "audit": "npm run audit:backend && npm run audit:frontend && npm run audit:contracts",
+    "audit:backend": "cd backend && cargo audit",
+    "audit:frontend": "cd frontend && npm audit",
+    "audit:contracts": "cd contracts/chainlib-contracts && cargo audit",
+    "docs": "npm run docs:backend && npm run docs:contracts",
+    "docs:backend": "cd backend && cargo doc --open --no-deps",
+    "docs:contracts": "cd contracts/chainlib-contracts && cargo doc --open --no-deps",
+    "clean": "npm run clean:backend && npm run clean:frontend && npm run clean:contracts",
+    "clean:backend": "cd backend && cargo clean",
+    "clean:frontend": "cd frontend && rm -rf .next node_modules",
+    "clean:contracts": "cd contracts/chainlib-contracts && cargo clean"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "blockchain",
+    "stellar",
+    "e-library",
+    "soroban",
+    "rust",
+    "nextjs",
+    "typescript",
+    "web3",
+    "decentralized"
+  ],
+  "author": "ChainLib Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/chainlib.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/chainlib/issues"
+  },
+  "homepage": "https://github.com/your-org/chainlib#readme"
+}

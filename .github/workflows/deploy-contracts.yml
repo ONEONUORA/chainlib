@@ -1,0 +1,140 @@
+name: Deploy Smart Contracts
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Target network'
+        required: true
+        default: 'testnet'
+        type: choice
+        options:
+        - testnet
+        - mainnet
+      source_account:
+        description: 'Source account name'
+        required: true
+        default: 'alice'
+        type: string
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  deploy-contracts:
+    name: Deploy to ${{ inputs.network }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.network }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: wasm32-unknown-unknown
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: "./contracts/chainlib-contracts -> target"
+
+    - name: Install Soroban CLI
+      run: |
+        cargo install --locked soroban-cli --features opt
+
+    - name: Build contracts
+      run: |
+        cd contracts/chainlib-contracts
+        soroban contract build
+
+    - name: Setup Soroban network configuration
+      run: |
+        if [ "${{ inputs.network }}" = "mainnet" ]; then
+          soroban network add mainnet \
+            --rpc-url https://soroban-rpc.mainnet.stellar.org:443 \
+            --network-passphrase "Public Global Stellar Network ; September 2015"
+        else
+          soroban network add testnet \
+            --rpc-url https://soroban-rpc.testnet.stellar.org:443 \
+            --network-passphrase "Test SDF Network ; September 2015"
+        fi
+
+    - name: Configure Soroban identity
+      run: |
+        # In a real deployment, you would use secrets for the private key
+        echo "⚠️  Configure your Stellar account identity"
+        echo "soroban keys add ${{ inputs.source_account }} --secret-key \$SECRET_KEY"
+      env:
+        SECRET_KEY: ${{ secrets.STELLAR_SECRET_KEY }}
+
+    - name: Deploy ChainLib contract
+      run: |
+        cd contracts/chainlib-contracts
+        
+        # Deploy the contract
+        CONTRACT_ID=$(soroban contract deploy \
+          --wasm target/wasm32-unknown-unknown/release/chainlib.wasm \
+          --source ${{ inputs.source_account }} \
+          --network ${{ inputs.network }})
+        
+        echo "Contract deployed with ID: $CONTRACT_ID"
+        echo "CONTRACT_ID=$CONTRACT_ID" >> $GITHUB_ENV
+        
+        # Initialize the contract
+        soroban contract invoke \
+          --id $CONTRACT_ID \
+          --source ${{ inputs.source_account }} \
+          --network ${{ inputs.network }} \
+          -- initialize
+
+    - name: Verify deployment
+      run: |
+        cd contracts/chainlib-contracts
+        
+        # Test basic contract functionality
+        echo "Testing contract deployment..."
+        
+        # You can add more verification steps here
+        soroban contract invoke \
+          --id $CONTRACT_ID \
+          --source ${{ inputs.source_account }} \
+          --network ${{ inputs.network }} \
+          -- get_all_books
+
+    - name: Save deployment info
+      run: |
+        mkdir -p deployment-info
+        cat > deployment-info/contract-${{ inputs.network }}.json << EOF
+        {
+          "network": "${{ inputs.network }}",
+          "contract_id": "$CONTRACT_ID",
+          "deployed_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "deployed_by": "${{ github.actor }}",
+          "commit_sha": "${{ github.sha }}",
+          "source_account": "${{ inputs.source_account }}"
+        }
+        EOF
+
+    - name: Upload deployment info
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-info-${{ inputs.network }}
+        path: deployment-info/
+        retention-days: 90
+
+    - name: Create deployment summary
+      run: |
+        echo "## 🚀 Contract Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Network**: ${{ inputs.network }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Contract ID**: \`$CONTRACT_ID\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Source Account**: ${{ inputs.source_account }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Deployed At**: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+        echo "1. Update frontend environment variables with the new contract ID" >> $GITHUB_STEP_SUMMARY
+        echo "2. Update backend configuration if needed" >> $GITHUB_STEP_SUMMARY
+        echo "3. Test the deployment with the frontend application" >> $GITHUB_STEP_SUMMARY

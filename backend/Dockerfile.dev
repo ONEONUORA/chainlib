@@ -1,0 +1,26 @@
+# Development Dockerfile for Rust backend
+FROM rust:1.75-slim
+
+# Install system dependencies and development tools
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    libpq-dev \
+    curl \
+    && cargo install cargo-watch \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /app
+
+# Copy manifests first for better caching
+COPY Cargo.toml Cargo.lock ./
+
+# Pre-build dependencies
+RUN mkdir src && echo "fn main() {}" > src/main.rs && cargo build && rm -rf src
+
+# Expose port
+EXPOSE 3001
+
+# Default command (can be overridden)
+CMD ["cargo", "watch", "-x", "run"]
