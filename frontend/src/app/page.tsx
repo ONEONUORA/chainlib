@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import { BookOpen, Users, Download, Shield } from 'lucide-react'
+import Link from "next/link";
+import { BookOpen, Users, Download, Shield } from "lucide-react";
 
 export default function Home() {
   return (
@@ -10,12 +10,26 @@ export default function Home() {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <BookOpen className="h-8 w-8 text-indigo-600" />
-              <span className="ml-2 text-2xl font-bold text-gray-900">ChainLib</span>
+              <span className="ml-2 text-2xl font-bold text-gray-900">
+                ChainLib
+              </span>
             </div>
             <nav className="hidden md:flex space-x-8">
-              <Link href="/books" className="text-gray-500 hover:text-gray-900">Browse Books</Link>
-              <Link href="/publish" className="text-gray-500 hover:text-gray-900">Publish</Link>
-              <Link href="/library" className="text-gray-500 hover:text-gray-900">My Library</Link>
+              <Link href="/books" className="text-gray-500 hover:text-gray-900">
+                Browse Books
+              </Link>
+              <Link
+                href="/publish"
+                className="text-gray-500 hover:text-gray-900"
+              >
+                Publish
+              </Link>
+              <Link
+                href="/library"
+                className="text-gray-500 hover:text-gray-900"
+              >
+                My Library
+              </Link>
             </nav>
             <div className="flex items-center space-x-4">
               <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
@@ -34,7 +48,8 @@ export default function Home() {
             <span className="block text-indigo-600">E-Library</span>
           </h1>
           <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-            Publish, discover, and read books on the Stellar blockchain. Authors earn directly, readers own their content forever.
+            Publish, discover, and read books on the Stellar blockchain. Authors
+            earn directly, readers own their content forever.
           </p>
           <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
             <div className="rounded-md shadow">
@@ -63,9 +78,12 @@ export default function Home() {
               <div className="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white mx-auto">
                 <BookOpen className="h-6 w-6" />
               </div>
-              <h3 className="mt-6 text-lg font-medium text-gray-900">Publish Easily</h3>
+              <h3 className="mt-6 text-lg font-medium text-gray-900">
+                Publish Easily
+              </h3>
               <p className="mt-2 text-base text-gray-500">
-                Upload your books and articles directly to the blockchain with just a few clicks.
+                Upload your books and articles directly to the blockchain with
+                just a few clicks.
               </p>
             </div>
 
@@ -73,9 +91,12 @@ export default function Home() {
               <div className="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white mx-auto">
                 <Users className="h-6 w-6" />
               </div>
-              <h3 className="mt-6 text-lg font-medium text-gray-900">Direct Earnings</h3>
+              <h3 className="mt-6 text-lg font-medium text-gray-900">
+                Direct Earnings
+              </h3>
               <p className="mt-2 text-base text-gray-500">
-                Authors receive payments directly without intermediaries taking a cut.
+                Authors receive payments directly without intermediaries taking
+                a cut.
               </p>
             </div>
 
@@ -83,9 +104,12 @@ export default function Home() {
               <div className="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white mx-auto">
                 <Download className="h-6 w-6" />
               </div>
-              <h3 className="mt-6 text-lg font-medium text-gray-900">Own Your Content</h3>
+              <h3 className="mt-6 text-lg font-medium text-gray-900">
+                Own Your Content
+              </h3>
               <p className="mt-2 text-base text-gray-500">
-                Download and keep your purchased books forever. No subscription required.
+                Download and keep your purchased books forever. No subscription
+                required.
               </p>
             </div>
 
@@ -93,9 +117,12 @@ export default function Home() {
               <div className="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white mx-auto">
                 <Shield className="h-6 w-6" />
               </div>
-              <h3 className="mt-6 text-lg font-medium text-gray-900">Blockchain Security</h3>
+              <h3 className="mt-6 text-lg font-medium text-gray-900">
+                Blockchain Security
+              </h3>
               <p className="mt-2 text-base text-gray-500">
-                All transactions and ownership records are secured by the Stellar blockchain.
+                All transactions and ownership records are secured by the
+                Stellar blockchain.
               </p>
             </div>
           </div>
@@ -126,12 +153,16 @@ export default function Home() {
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <BookOpen className="h-6 w-6 text-indigo-600" />
-              <span className="ml-2 text-lg font-semibold text-gray-900">ChainLib</span>
+              <span className="ml-2 text-lg font-semibold text-gray-900">
+                ChainLib
+              </span>
             </div>
-            <p className="text-gray-500">© 2024 ChainLib. Built on Stellar blockchain.</p>
+            <p className="text-gray-500">
+              © 2024 ChainLib. Built on Stellar blockchain.
+            </p>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }

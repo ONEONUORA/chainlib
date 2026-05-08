@@ -2,10 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  experimental: {
-    // Enable if you want to use server actions
-    serverActions: true,
-  },
   // Environment variables that should be available at build time
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
@@ -14,7 +10,12 @@ const nextConfig: NextConfig = {
   },
   // Image optimization
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
   },
   // Security headers
   async headers() {

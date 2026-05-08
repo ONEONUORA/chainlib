@@ -1,5 +1,7 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Env, String, Vec, Address, Symbol};
+use soroban_sdk::{
+    contract, contractimpl, contracttype, symbol_short, Address, Env, String, Symbol, Vec,
+};
 
 #[derive(Clone)]
 #[contracttype]
@@ -77,7 +79,7 @@ impl ChainLibContract {
     pub fn get_all_books(env: Env) -> Vec<u64> {
         let book_count: u64 = env.storage().instance().get(&BOOK_COUNT).unwrap_or(0);
         let mut books = Vec::new(&env);
-        
+
         for i in 1..=book_count {
             if let Some(book) = Self::get_book(env.clone(), i) {
                 if book.is_active {
@@ -85,7 +87,7 @@ impl ChainLibContract {
                 }
             }
         }
-        
+
         books
     }
 
@@ -147,7 +149,7 @@ impl ChainLibContract {
     pub fn get_books_by_author(env: Env, author: Address) -> Vec<u64> {
         let book_count: u64 = env.storage().instance().get(&BOOK_COUNT).unwrap_or(0);
         let mut author_books = Vec::new(&env);
-        
+
         for i in 1..=book_count {
             if let Some(book) = Self::get_book(env.clone(), i) {
                 if book.author == author {
@@ -155,7 +157,7 @@ impl ChainLibContract {
                 }
             }
         }
-        
+
         author_books
     }
 }

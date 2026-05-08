@@ -1,0 +1,5 @@
+/Users/mac/Desktop/codes/drips_network/chainlib/backend/target/release/build/serde_json-0578dbaa71d2722c/build_script_build-0578dbaa71d2722c.d: /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.149/build.rs
+
+/Users/mac/Desktop/codes/drips_network/chainlib/backend/target/release/build/serde_json-0578dbaa71d2722c/build_script_build-0578dbaa71d2722c: /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.149/build.rs
+
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.149/build.rs:

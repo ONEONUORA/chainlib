@@ -9,7 +9,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tower_http::cors::CorsLayer;
 use tracing::{info, Level};
-use tracing_subscriber;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Book {
@@ -41,9 +40,7 @@ struct ApiResponse<T> {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Initialize tracing
-    tracing_subscriber::fmt()
-        .with_max_level(Level::INFO)
-        .init();
+    tracing_subscriber::fmt().with_max_level(Level::INFO).init();
 
     // Load environment variables
     dotenv::dotenv().ok();
@@ -74,17 +71,15 @@ async fn health_check() -> Json<ApiResponse<String>> {
 
 async fn get_books(Query(_params): Query<HashMap<String, String>>) -> Json<ApiResponse<Vec<Book>>> {
     // TODO: Implement database query
-    let books = vec![
-        Book {
-            id: "1".to_string(),
-            title: "Sample Book".to_string(),
-            author: "John Doe".to_string(),
-            description: "A sample book for testing".to_string(),
-            price: 9.99,
-            content_hash: "hash123".to_string(),
-            published_at: chrono::Utc::now(),
-        }
-    ];
+    let books = vec![Book {
+        id: "1".to_string(),
+        title: "Sample Book".to_string(),
+        author: "John Doe".to_string(),
+        description: "A sample book for testing".to_string(),
+        price: 9.99,
+        content_hash: "hash123".to_string(),
+        published_at: chrono::Utc::now(),
+    }];
 
     Json(ApiResponse {
         success: true,
@@ -93,7 +88,9 @@ async fn get_books(Query(_params): Query<HashMap<String, String>>) -> Json<ApiRe
     })
 }
 
-async fn get_book(axum::extract::Path(id): axum::extract::Path<String>) -> Result<Json<ApiResponse<Book>>, StatusCode> {
+async fn get_book(
+    axum::extract::Path(id): axum::extract::Path<String>,
+) -> Result<Json<ApiResponse<Book>>, StatusCode> {
     // TODO: Implement database query
     if id == "1" {
         let book = Book {

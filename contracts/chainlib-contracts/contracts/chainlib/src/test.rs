@@ -6,7 +6,9 @@ use soroban_sdk::{testutils::Address as _, Address, Env, String};
 #[test]
 fn test_publish_and_get_book() {
     let env = Env::default();
-    let contract_id = env.register_contract(None, ChainLibContract);
+    env.mock_all_auths();
+    
+    let contract_id = env.register(ChainLibContract, ());
     let client = ChainLibContractClient::new(&env, &contract_id);
 
     // Initialize the contract
@@ -29,13 +31,15 @@ fn test_publish_and_get_book() {
     assert_eq!(book.title, title);
     assert_eq!(book.author, author);
     assert_eq!(book.price, price);
-    assert_eq!(book.is_active, true);
+    assert!(book.is_active);
 }
 
 #[test]
 fn test_purchase_book() {
     let env = Env::default();
-    let contract_id = env.register_contract(None, ChainLibContract);
+    env.mock_all_auths();
+    
+    let contract_id = env.register(ChainLibContract, ());
     let client = ChainLibContractClient::new(&env, &contract_id);
 
     // Initialize the contract
@@ -54,17 +58,19 @@ fn test_purchase_book() {
 
     // Purchase the book
     let success = client.purchase_book(&buyer, &book_id);
-    assert_eq!(success, true);
+    assert!(success);
 
     // Check if user has purchased the book
     let has_purchased = client.has_purchased(&buyer, &book_id);
-    assert_eq!(has_purchased, true);
+    assert!(has_purchased);
 }
 
 #[test]
 fn test_get_all_books() {
     let env = Env::default();
-    let contract_id = env.register_contract(None, ChainLibContract);
+    env.mock_all_auths();
+    
+    let contract_id = env.register(ChainLibContract, ());
     let client = ChainLibContractClient::new(&env, &contract_id);
 
     // Initialize the contract

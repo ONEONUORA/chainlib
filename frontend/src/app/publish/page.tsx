@@ -1,63 +1,67 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { BookOpen, Upload, DollarSign, FileText } from 'lucide-react'
+import { useState } from "react";
+import Link from "next/link";
+import { BookOpen, Upload, DollarSign, FileText } from "lucide-react";
 
 export default function PublishPage() {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    price: '',
-    category: 'technology',
-    content: null as File | null
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+    title: "",
+    description: "",
+    price: "",
+    category: "technology",
+    content: null as File | null,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null
-    setFormData(prev => ({
+    const file = e.target.files?.[0] || null;
+    setFormData((prev) => ({
       ...prev,
-      content: file
-    }))
-  }
+      content: file,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       // TODO: Implement actual publishing logic
-      console.log('Publishing book:', formData)
-      
+      console.log("Publishing book:", formData);
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      alert('Book published successfully!')
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      alert("Book published successfully!");
+
       // Reset form
       setFormData({
-        title: '',
-        description: '',
-        price: '',
-        category: 'technology',
-        content: null
-      })
+        title: "",
+        description: "",
+        price: "",
+        category: "technology",
+        content: null,
+      });
     } catch (error) {
-      console.error('Error publishing book:', error)
-      alert('Error publishing book. Please try again.')
+      console.error("Error publishing book:", error);
+      alert("Error publishing book. Please try again.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -67,12 +71,23 @@ export default function PublishPage() {
           <div className="flex justify-between items-center py-6">
             <Link href="/" className="flex items-center">
               <BookOpen className="h-8 w-8 text-indigo-600" />
-              <span className="ml-2 text-2xl font-bold text-gray-900">ChainLib</span>
+              <span className="ml-2 text-2xl font-bold text-gray-900">
+                ChainLib
+              </span>
             </Link>
             <nav className="hidden md:flex space-x-8">
-              <Link href="/books" className="text-gray-500 hover:text-gray-900">Browse Books</Link>
-              <Link href="/publish" className="text-indigo-600 font-medium">Publish</Link>
-              <Link href="/library" className="text-gray-500 hover:text-gray-900">My Library</Link>
+              <Link href="/books" className="text-gray-500 hover:text-gray-900">
+                Browse Books
+              </Link>
+              <Link href="/publish" className="text-indigo-600 font-medium">
+                Publish
+              </Link>
+              <Link
+                href="/library"
+                className="text-gray-500 hover:text-gray-900"
+              >
+                My Library
+              </Link>
             </nav>
             <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
               Connect Wallet
@@ -84,8 +99,13 @@ export default function PublishPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Publish Your Book</h1>
-          <p className="mt-2 text-gray-600">Share your knowledge with the world and earn directly from your readers</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Publish Your Book
+          </h1>
+          <p className="mt-2 text-gray-600">
+            Share your knowledge with the world and earn directly from your
+            readers
+          </p>
         </div>
 
         {/* Publishing Form */}
@@ -93,7 +113,10 @@ export default function PublishPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title */}
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Book Title *
               </label>
               <input
@@ -110,7 +133,10 @@ export default function PublishPage() {
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Description *
               </label>
               <textarea
@@ -128,7 +154,10 @@ export default function PublishPage() {
             {/* Price and Category */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="price"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   <DollarSign className="inline h-4 w-4 mr-1" />
                   Price (USD) *
                 </label>
@@ -147,7 +176,10 @@ export default function PublishPage() {
               </div>
 
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="category"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Category *
                 </label>
                 <select
@@ -171,7 +203,10 @@ export default function PublishPage() {
 
             {/* File Upload */}
             <div>
-              <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="content"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 <FileText className="inline h-4 w-4 mr-1" />
                 Book Content *
               </label>
@@ -196,7 +231,9 @@ export default function PublishPage() {
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">PDF, EPUB, TXT, DOCX up to 50MB</p>
+                  <p className="text-xs text-gray-500">
+                    PDF, EPUB, TXT, DOCX up to 50MB
+                  </p>
                   {formData.content && (
                     <p className="text-sm text-green-600 mt-2">
                       Selected: {formData.content.name}
@@ -208,12 +245,17 @@ export default function PublishPage() {
 
             {/* Publishing Info */}
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">Publishing Information</h3>
+              <h3 className="text-sm font-medium text-blue-800 mb-2">
+                Publishing Information
+              </h3>
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• Your book will be stored securely on the blockchain</li>
                 <li>• Readers will purchase access using Stellar tokens</li>
-                <li>• You'll receive payments directly to your wallet</li>
-                <li>• Publishing fee: 0.5 XLM (covers blockchain transaction costs)</li>
+                <li>• You&apos;ll receive payments directly to your wallet</li>
+                <li>
+                  • Publishing fee: 0.5 XLM (covers blockchain transaction
+                  costs)
+                </li>
               </ul>
             </div>
 
@@ -245,7 +287,9 @@ export default function PublishPage() {
           <h3 className="text-lg font-medium text-gray-900 mb-4">Need Help?</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">Supported Formats</h4>
+              <h4 className="font-medium text-gray-900 mb-2">
+                Supported Formats
+              </h4>
               <ul className="space-y-1">
                 <li>• PDF - Best for formatted books</li>
                 <li>• EPUB - Standard e-book format</li>
@@ -257,7 +301,7 @@ export default function PublishPage() {
               <h4 className="font-medium text-gray-900 mb-2">Pricing Tips</h4>
               <ul className="space-y-1">
                 <li>• Research similar books in your category</li>
-                <li>• Consider your book's length and depth</li>
+                <li>• Consider your book&apos;s length and depth</li>
                 <li>• Start with competitive pricing</li>
                 <li>• You can update pricing later</li>
               </ul>
@@ -266,5 +310,5 @@ export default function PublishPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

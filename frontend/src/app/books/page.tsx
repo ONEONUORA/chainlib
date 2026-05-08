@@ -1,73 +1,80 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { BookOpen, Search, Filter, Star } from 'lucide-react'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { BookOpen, Search, Filter, Star } from "lucide-react";
 
 interface Book {
-  id: string
-  title: string
-  author: string
-  description: string
-  price: number
-  content_hash: string
-  published_at: string
+  id: string;
+  title: string;
+  author: string;
+  description: string;
+  price: number;
+  content_hash: string;
+  published_at: string;
 }
 
 export default function BooksPage() {
-  const [books, setBooks] = useState<Book[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-
-  useEffect(() => {
-    fetchBooks()
-  }, [])
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const fetchBooks = async () => {
     try {
       // TODO: Replace with actual API call
       const mockBooks: Book[] = [
         {
-          id: '1',
-          title: 'The Future of Blockchain',
-          author: 'Alice Johnson',
-          description: 'A comprehensive guide to understanding blockchain technology and its applications.',
+          id: "1",
+          title: "The Future of Blockchain",
+          author: "Alice Johnson",
+          description:
+            "A comprehensive guide to understanding blockchain technology and its applications.",
           price: 9.99,
-          content_hash: 'hash123',
-          published_at: '2024-01-15'
+          content_hash: "hash123",
+          published_at: "2024-01-15",
         },
         {
-          id: '2',
-          title: 'Stellar Development Guide',
-          author: 'Bob Smith',
-          description: 'Learn how to build applications on the Stellar network.',
+          id: "2",
+          title: "Stellar Development Guide",
+          author: "Bob Smith",
+          description:
+            "Learn how to build applications on the Stellar network.",
           price: 14.99,
-          content_hash: 'hash456',
-          published_at: '2024-02-01'
+          content_hash: "hash456",
+          published_at: "2024-02-01",
         },
         {
-          id: '3',
-          title: 'Decentralized Finance Explained',
-          author: 'Carol Davis',
-          description: 'Understanding DeFi protocols and their impact on traditional finance.',
+          id: "3",
+          title: "Decentralized Finance Explained",
+          author: "Carol Davis",
+          description:
+            "Understanding DeFi protocols and their impact on traditional finance.",
           price: 12.99,
-          content_hash: 'hash789',
-          published_at: '2024-02-10'
-        }
-      ]
-      setBooks(mockBooks)
+          content_hash: "hash789",
+          published_at: "2024-02-10",
+        },
+      ];
+      setBooks(mockBooks);
     } catch (error) {
-      console.error('Error fetching books:', error)
+      console.error("Error fetching books:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const filteredBooks = books.filter(book =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.author.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  useEffect(() => {
+    const loadBooks = async () => {
+      await fetchBooks();
+    };
+    loadBooks();
+  }, []);
+
+  const filteredBooks = books.filter(
+    (book) =>
+      book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      book.author.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -77,12 +84,26 @@ export default function BooksPage() {
           <div className="flex justify-between items-center py-6">
             <Link href="/" className="flex items-center">
               <BookOpen className="h-8 w-8 text-indigo-600" />
-              <span className="ml-2 text-2xl font-bold text-gray-900">ChainLib</span>
+              <span className="ml-2 text-2xl font-bold text-gray-900">
+                ChainLib
+              </span>
             </Link>
             <nav className="hidden md:flex space-x-8">
-              <Link href="/books" className="text-indigo-600 font-medium">Browse Books</Link>
-              <Link href="/publish" className="text-gray-500 hover:text-gray-900">Publish</Link>
-              <Link href="/library" className="text-gray-500 hover:text-gray-900">My Library</Link>
+              <Link href="/books" className="text-indigo-600 font-medium">
+                Browse Books
+              </Link>
+              <Link
+                href="/publish"
+                className="text-gray-500 hover:text-gray-900"
+              >
+                Publish
+              </Link>
+              <Link
+                href="/library"
+                className="text-gray-500 hover:text-gray-900"
+              >
+                My Library
+              </Link>
             </nav>
             <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
               Connect Wallet
@@ -95,7 +116,9 @@ export default function BooksPage() {
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Browse Books</h1>
-          <p className="mt-2 text-gray-600">Discover amazing books published on the blockchain</p>
+          <p className="mt-2 text-gray-600">
+            Discover amazing books published on the blockchain
+          </p>
         </div>
 
         {/* Search and Filters */}
@@ -133,12 +156,19 @@ export default function BooksPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBooks.map((book) => (
-              <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div
+                key={book.id}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              >
                 <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{book.title}</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {book.title}
+                  </h3>
                   <p className="text-gray-600 mb-2">by {book.author}</p>
-                  <p className="text-gray-500 text-sm mb-4 line-clamp-3">{book.description}</p>
-                  
+                  <p className="text-gray-500 text-sm mb-4 line-clamp-3">
+                    {book.description}
+                  </p>
+
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
                       <Star className="h-4 w-4 text-yellow-400 fill-current" />
@@ -148,9 +178,11 @@ export default function BooksPage() {
                       <Star className="h-4 w-4 text-gray-300" />
                       <span className="ml-2 text-sm text-gray-600">(4.0)</span>
                     </div>
-                    <span className="text-lg font-bold text-indigo-600">${book.price}</span>
+                    <span className="text-lg font-bold text-indigo-600">
+                      ${book.price}
+                    </span>
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <Link
                       href={`/books/${book.id}`}
@@ -171,11 +203,15 @@ export default function BooksPage() {
         {filteredBooks.length === 0 && !loading && (
           <div className="text-center py-12">
             <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No books found</h3>
-            <p className="mt-1 text-sm text-gray-500">Try adjusting your search terms or filters.</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              No books found
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Try adjusting your search terms or filters.
+            </p>
           </div>
         )}
       </main>
     </div>
-  )
+  );
 }
