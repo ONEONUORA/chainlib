@@ -134,7 +134,7 @@ jobs:
 
     - name: Install Soroban CLI
       run: |
-        cargo install --locked soroban-cli --features opt
+        cargo install --locked soroban-cli
 
     - name: Check formatting
       run: cargo fmt -- --check
@@ -230,7 +230,7 @@ jobs:
       uses: Swatinem/rust-cache@v2
 
     - name: Install Soroban CLI
-      run: cargo install --locked soroban-cli --features opt
+      run: cargo install --locked soroban-cli
 
     - name: Install dependencies
       run: |

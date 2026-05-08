@@ -26,7 +26,7 @@
     "setup": "npm run setup:frontend && npm run setup:backend && npm run setup:contracts",
     "setup:frontend": "cd frontend && npm install",
     "setup:backend": "cd backend && cargo build",
-    "setup:contracts": "cargo install --locked soroban-cli --features opt",
+    "setup:contracts": "cargo install --locked soroban-cli",
     "deploy:contracts:testnet": "cd contracts/chainlib-contracts && soroban contract deploy --wasm target/wasm32-unknown-unknown/release/chainlib.wasm --source alice --network testnet",
     "deploy:contracts:mainnet": "cd contracts/chainlib-contracts && soroban contract deploy --wasm target/wasm32-unknown-unknown/release/chainlib.wasm --source alice --network mainnet",
     "docker:up": "docker-compose up --build",
